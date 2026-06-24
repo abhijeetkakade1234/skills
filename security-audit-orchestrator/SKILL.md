@@ -16,7 +16,7 @@ Operate as a chief security auditor coordinating a team of specialist security s
 - Each skill is a complete Phase 1-7 audit framework
 - Can be invoked independently or coordinated by orchestrator
 
-## Skill Ecosystem — 13 Total Security Skills
+## Skill Ecosystem — 16 Total Security Skills (13 specialized + 3 top-level references)
 
 ### Tier 1: Foundation Skills (Always Invoked)
 1. **blueteam-defend** (287 lines) — Full defensive audit, all OWASP layers, never-trust doctrine
@@ -32,7 +32,7 @@ Operate as a chief security auditor coordinating a team of specialist security s
 4. **access-control-auditing** (288 lines) — IDOR/BOLA/BFLA (backend-is-truth doctrine)
    Location: `/d/skills/security-audit-orchestrator/specialized/access-control-auditing/SKILL.md`
 
-5. **jwt-cryptography-audit** (101 lines) — JWT security, algorithm confusion
+5. **jwt-cryptography-audit** (308 lines) — JWT security, algorithm confusion
    Location: `/d/skills/security-audit-orchestrator/specialized/jwt-cryptography-audit/SKILL.md`
 
 6. **frontend-validation-bypass** (275 lines) — Client-side checks (only HIGH if backend fails)
@@ -42,20 +42,20 @@ Operate as a chief security auditor coordinating a team of specialist security s
    Location: `/d/skills/security-audit-orchestrator/specialized/mass-assignment-audit/SKILL.md`
 
 ### Tier 3: Injection & Input Skills (Deep-Dive Attack Vectors)
-8. **sql-injection-deep-dive** (98 lines) — String concatenation in queries, real payloads
+8. **sql-injection-deep-dive** (348 lines) — String concatenation in queries, real payloads
    Location: `/d/skills/security-audit-orchestrator/specialized/sql-injection-deep-dive/SKILL.md`
 
 9. **character-encoding-injection** (289 lines) — Emoji/Unicode attacks, byte-length overflow
    Location: `/d/skills/security-audit-orchestrator/specialized/character-encoding-injection/SKILL.md`
 
-10. **cors-csrf-audit** (101 lines) — Cross-origin attacks, CSRF tokens, cookie security
+10. **cors-csrf-audit** (381 lines) — Cross-origin attacks, CSRF tokens, cookie security
     Location: `/d/skills/security-audit-orchestrator/specialized/cors-csrf-audit/SKILL.md`
 
 ### Tier 4: Reliability & Rate Limiting
 11. **fail-open-error-handling** (302 lines) — Fail-open vs fail-closed distinction
     Location: `/d/skills/security-audit-orchestrator/specialized/fail-open-error-handling/SKILL.md`
 
-12. **rate-limiting-audit** (114 lines) — Brute-force, auth endpoint throttling
+12. **rate-limiting-audit** (332 lines) — Brute-force, auth endpoint throttling
     Location: `/d/skills/security-audit-orchestrator/specialized/rate-limiting-audit/SKILL.md`
 
 13. **integer-arithmetic-hardening** (268 lines) — Overflow/underflow in financial code
@@ -65,7 +65,7 @@ Operate as a chief security auditor coordinating a team of specialist security s
 14. **memory-resource-leaks** (263 lines) — File handles, goroutines, listeners
     Location: `/d/skills/security-audit-orchestrator/specialized/memory-resource-leaks/SKILL.md`
 
-15. **dependency-security-audit** (98 lines) — CVEs, supply chain attacks
+15. **dependency-security-audit** (269 lines) — CVEs, supply chain attacks
     Location: `/d/skills/security-audit-orchestrator/specialized/dependency-security-audit/SKILL.md`
 
 16. **solidity-hardening** (282 lines) — Smart contract hardening (only for blockchain)
@@ -117,11 +117,11 @@ Relationship to blueteam-defend
 - ✅ fail-open-error-handling (302 lines, FULL Phase 1-7, fail-open vs fail-closed)
 - ✅ character-encoding-injection (289 lines, FULL Phase 1-7, emoji/Unicode attacks)
 - ✅ access-control-auditing (288 lines, FULL Phase 1-7, IDOR/BOLA/BFLA)
-- ✅ rate-limiting-audit (114 lines, FULL Phase 1-7, standard rate limits)
-- ✅ sql-injection-deep-dive (98 lines, FULL Phase 1-7, real payloads)
-- ✅ cors-csrf-audit (101 lines, FULL Phase 1-7, cross-origin & CSRF)
-- ✅ jwt-cryptography-audit (101 lines, FULL Phase 1-7, token security)
-- ✅ dependency-security-audit (98 lines, FULL Phase 1-7, supply chain)
+- ✅ rate-limiting-audit (332 lines, FULL Phase 1-7, standard rate limits)
+- ✅ sql-injection-deep-dive (348 lines, FULL Phase 1-7, real payloads)
+- ✅ cors-csrf-audit (381 lines, FULL Phase 1-7, cross-origin & CSRF)
+- ✅ jwt-cryptography-audit (308 lines, FULL Phase 1-7, token security)
+- ✅ dependency-security-audit (269 lines, FULL Phase 1-7, supply chain)
 
 ## Orchestration Workflow
 
