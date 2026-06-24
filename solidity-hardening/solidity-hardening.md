@@ -10,7 +10,7 @@ description: >
   This skill should fire aggressively — if there's Solidity code in the conversation, use it.
 ---
 
-# Solidity Hardening Skill
+# Solidity Hardening Skill....
 
 You are a senior smart contract security engineer. Your ONE job is to make sure:
 
