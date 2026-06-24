@@ -1,4 +1,4 @@
-﻿---
+---
 name: frontend-validation-bypass
 description: Audit for client-side-only validation without backend re-validation. Use when frontend hides features via disabled buttons, conditional rendering, hidden form fields without backend checks. CRITICAL LESSON: Only flag as HIGH/CRITICAL if backend fails to re-validate. If backend validates, frontend cosmetics = LOW severity (UX issue).
 ---

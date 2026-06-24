@@ -1,4 +1,4 @@
-﻿---
+---
 name: mass-assignment-audit
 description: Audit for mass assignment (BOPLA) where attacker adds unexpected fields to requests. Detects Model.update(req.body) patterns that bind all fields without allowlist. Use when code has ORM .fill(), .assign(), Object.assign(), or direct attribute setting from user input. Extends blueteam-defend Layer 1 (Broken Access Control).
 ---

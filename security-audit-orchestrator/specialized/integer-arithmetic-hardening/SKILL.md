@@ -1,4 +1,4 @@
-﻿---
+---
 name: integer-arithmetic-hardening
 description: Audit integer overflow, underflow, type confusion, precision loss, truncation in arithmetic operations. Use when code has balances, counters, prices, percentages, or financial calculations. Extends blueteam-defend Layer 5b (Numeric Vulnerabilities) & Layer 2 (Injection).
 ---

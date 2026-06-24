@@ -1,4 +1,4 @@
-﻿---
+---
 name: fail-open-error-handling
 description: Audit for fail-open bugs where exceptions grant privileges, default-allow on error, or auth/validation checks skipped. Use when code has try-catch-pass, empty catch blocks, or missing error checks on auth paths. CRITICAL DISTINCTION: Only flag if error grants access (fail-open). If error denies access, it's safe (fail-closed).
 ---

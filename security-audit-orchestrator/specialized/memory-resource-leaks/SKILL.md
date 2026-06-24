@@ -1,4 +1,4 @@
-﻿---
+---
 name: memory-resource-leaks
 description: Audit for resource exhaustion: file handle leaks, DB connection leaks, goroutine/thread leaks, listener leaks, unclosed streams across Python, Go, Rust, C/C++, JavaScript, Java, C#. Use when code opens files, connections, or spawns threads without closing. Extends blueteam-defend Layer 6 (DoS & Resource Limits).
 ---

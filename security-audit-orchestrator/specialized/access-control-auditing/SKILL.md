@@ -1,4 +1,4 @@
-﻿---
+---
 name: access-control-auditing
 description: Audit for broken access control: IDOR (Insecure Direct Object Reference), BOLA (Broken Object-Level Access Control), BFLA (Broken Function-Level Access Control). Use when testing user data access, role checks, resource ownership. CRITICAL: Only flag CRITICAL if vulnerability is exploitable. If backend enforces checks, frontend exposure = LOW severity (cosmetic).
 ---

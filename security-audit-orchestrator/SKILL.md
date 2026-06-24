@@ -130,31 +130,7 @@ Example Triggers (5-8 user phrases)
 Relationship to blueteam-defend
 ```
 
-**Status per skill:**
-- ✅ blueteam-defend (287 lines, exemplary, all phases)
-- ✅ redteam-attack (306 lines, exemplary, all phases)
-- ✅ solidity-hardening (282 lines, exemplary, all phases)
-- ✅ secret-scanning (203 lines, FULL Phase 1-7, public config ≠ true secrets)
-- ✅ memory-resource-leaks (263 lines, FULL Phase 1-7, resource lifecycle audit)
-- ✅ mass-assignment-audit (263 lines, FULL Phase 1-7, ORM field binding)
-- ✅ integer-arithmetic-hardening (268 lines, FULL Phase 1-7, overflow/underflow)
-- ✅ frontend-validation-bypass (275 lines, FULL Phase 1-7, backend-is-truth)
-- ✅ fail-open-error-handling (302 lines, FULL Phase 1-7, fail-open vs fail-closed)
-- ✅ character-encoding-injection (289 lines, FULL Phase 1-7, emoji/Unicode attacks)
-- ✅ access-control-auditing (288 lines, FULL Phase 1-7, IDOR/BOLA/BFLA)
-- ✅ rate-limiting-audit (332 lines, FULL Phase 1-7, standard rate limits)
-- ✅ sql-injection-deep-dive (348 lines, FULL Phase 1-7, real payloads)
-- ✅ cors-csrf-audit (381 lines, FULL Phase 1-7, cross-origin & CSRF)
-- ✅ jwt-cryptography-audit (308 lines, FULL Phase 1-7, token security)
-- ✅ dependency-security-audit (269 lines, FULL Phase 1-7, supply chain)
-- ✅ ai-prompt-injection-audit (328 lines, FULL Phase 1-7, LLM injection / OWASP LLM Top 10)
-- ✅ api-abuse-detection (357 lines, FULL Phase 1-7, abuse-at-scale of legitimate APIs)
-- ✅ api-rate-limiting (404 lines, FULL Phase 1-7, platform quota/cost/gateway)
-- ✅ concurrency-race-condition-audit (364 lines, FULL Phase 1-7, TOCTOU/double-spend)
-- ✅ container-kubernetes-security-audit (409 lines, FULL Phase 1-7, Docker/K8s hardening)
-- ✅ cryptographic-weaknesses-audit (374 lines, FULL Phase 1-7, OWASP A02)
-- ✅ iam-privilege-escalation-audit (341 lines, FULL Phase 1-7, cloud IAM privesc)
-- ✅ mobile-app-security-audit (385 lines, FULL Phase 1-7, iOS/Android MASVS)
+**Status:** All 24 skills are complete and follow the full Phase 1-7 format above. Per-skill line counts and one-line scopes live in the Skill Ecosystem listing; severity doctrine lives in Severity Mapping. (No per-skill status table here — it would just restate the ecosystem listing.)
 
 ## Orchestration Workflow
 
@@ -283,26 +259,6 @@ All skills include grep patterns for:
 - **Ruby** (Rails)
 - **Solidity** (Ethereum smart contracts)
 
-## Deduplication Examples
-
-**Scenario 1: SQL Injection via Emoji**
-- sql-injection-deep-dive: "String concat in query, emoji injection possible"
-- character-encoding-injection: "Emoji = 4 bytes, bypasses filters"
-- **Merge:** 1 finding: "SQL injection via emoji in [location]"
-- **Source:** Confirmed by sql-injection-deep-dive + character-encoding-injection
-
-**Scenario 2: JWT Secret Exposed**
-- secret-scanning: "Hardcoded JWT secret in code"
-- jwt-cryptography-audit: "HMAC secret in git history"
-- **Merge:** 1 finding: "JWT HMAC secret exposed in [location]"
-- **Source:** Confirmed by secret-scanning + jwt-cryptography-audit
-
-**Scenario 3: Frontend Permission Check Only**
-- access-control-auditing: "Admin UI hidden, but API accessible"
-- frontend-validation-bypass: "Permission check only in frontend"
-- **Merge:** 1 finding: "BFLA: Admin API missing backend role check"
-- **Source:** Confirmed by access-control-auditing + frontend-validation-bypass
-
 ## Severity Mapping (OWASP 2025)
 
 | OWASP Layer | Skills | Example Severities |
@@ -350,19 +306,12 @@ blueteam-defend is comprehensive (287 lines, all OWASP layers); orchestrator add
 
 ## Quality Checklist
 
-1. ✅ All 21 specialized skills follow Phase 1-7 structure
-2. ✅ All 21 skills include Core Doctrine table
-3. ✅ All 21 skills include Operating Principles (5-8 bullets)
-4. ✅ All 21 skills include Phase 2 grep leads (per-language or per-artifact)
-5. ✅ All 21 skills include Phase 4 Ponytail ladder (framework-first)
-6. ✅ All 21 skills include Phase 6 code examples (vulnerable → fixed)
-7. ✅ All 21 skills include Phase 7 verification checklist
-8. ✅ All 21 skills include Quality Bar (8-10 criteria)
-9. ✅ Deduplication logic defined (6 intentional overlaps)
-10. ✅ Key learnings embedded (public config, backend-is-truth, fail-closed, compensating controls, Ponytail)
-11. ✅ IceBreaker lessons applied (no over-flagging, distinction between HIGH vs LOW)
-12. ✅ Organized hierarchically (orchestrator as main, specialized skills in subfolder)
-13. ✅ Ready for production use on any codebase type
+1. ✅ All 21 specialized skills implement the full Best Practice Format above (Core Doctrine → Phases 1-7 → Quality Bar → Triggers)
+2. ✅ Deduplication logic defined (6 intentional overlaps — see step 10)
+3. ✅ Key learnings embedded (public config, backend-is-truth, fail-closed, compensating controls, Ponytail)
+4. ✅ IceBreaker lessons applied (no over-flagging, distinction between HIGH vs LOW)
+5. ✅ Organized hierarchically (orchestrator as main, specialized skills in subfolder)
+6. ✅ Ready for production use on any codebase type
 
 ## Next Steps
 

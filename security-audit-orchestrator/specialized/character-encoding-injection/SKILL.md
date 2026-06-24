@@ -1,4 +1,4 @@
-﻿---
+---
 name: character-encoding-injection
 description: Audit for character encoding vulnerabilities: emoji/Unicode attacks causing SQL injection, buffer overflow, truncation, Unicode normalization bypasses. Use when code takes user text, has string concatenation in queries, or byte-length limits. Extends blueteam-defend Layer 2 (Injection).
 ---

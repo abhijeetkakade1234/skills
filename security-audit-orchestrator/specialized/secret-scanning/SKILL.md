@@ -1,4 +1,4 @@
-﻿---
+---
 name: secret-scanning
 description: Detect exposed secrets (private keys, DB passwords, JWT tokens, API credentials). Distinguish PUBLIC client-side config (Firebase/Google keys) from TRUE SECRETS (private keys, OAuth secrets, database passwords). Check Google/issuer audit logs - no alerts = safe. Extends blueteam-defend Layer 11 (Secrets).
 ---
