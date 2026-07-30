@@ -1,322 +1,127 @@
-﻿---
+---
 name: security-audit-orchestrator
-description: Master security audit coordinator that orchestrates all cybersecurity skills to perform comprehensive assessment against OWASP Top 10 2025. Scopes codebase, selects applicable skills, runs audits in priority order, synthesizes findings, deduplicates, and proposes batched remediation.
+description: Master security audit coordinator that orchestrates specialist cybersecurity skills against OWASP Top 10 2025. Scopes the codebase, selects applicable skills, runs them in priority order, deduplicates, adversarially verifies, ranks by exploitability, and proposes batched remediation.
 ---
 
-# Security Audit Orchestrator — Comprehensive Vulnerability Assessment
+# Security Audit Orchestrator
 
-Operate as a chief security auditor coordinating a team of specialist security skills.
+Chief auditor coordinating a team of specialist skills. This file = selection + phasing + synthesis. Each specialist (Phase 1-7 framework) lives in `specialized/<name>/SKILL.md` and can run standalone.
 
-## Organization & File Structure
+Lean runnable cousin for "we now have the backend, what's actually exploitable": `backend-security-reaudit` (user skills).
 
-**Main entry point:** `/security-audit-orchestrator/SKILL.md` (this file)
+## Doctrine (applies to every finding)
 
-**Specialized skills subfolder:** `/security-audit-orchestrator/specialized/`
-- Contains all 21 production security audit skills
-- Each skill is a complete Phase 1-7 audit framework
-- Can be invoked independently or coordinated by orchestrator
+1. **Threat-tier before severity.** Severity is noise until you say who can reach it. **Tier A** = live-exploitable by external/normal user, no special access (IDOR, missing route auth, brute-force, injection). **Tier B** = needs repo or host/log access (committed secrets, secrets in logs, fail-open env gates). Tier A is the headline; never headline Tier B as a live CRITICAL.
+2. **Backend is truth.** Client-side gate is cosmetic (LOW) unless it leaks a secret / stores tokens insecurely / exposes a privileged capability with no server round-trip. If the backend validates, the frontend bypass is LOW.
+3. **Public config ≠ secret.** Firebase *client* keys, Razorpay *publishable* key_id, API URLs are safe in clients — flag only if the issuer gives no abuse monitoring. `BEGIN PRIVATE KEY` / DB creds / `key_secret` are real.
+4. **Fail-closed ≠ fail-open.** Only flag if the error path *grants* access/operation.
+5. **Verify compensating controls.** Downstream auth may mitigate (IDOR in UI but backend scopes = LOW).
+6. **Ponytail fix ladder.** Framework control first, custom last. Stop at the lowest rung that holds.
 
-## Skill Ecosystem — 24 Total Security Skills (21 specialized + 3 top-level references)
+## Skill catalog (24)
 
-### Tier 1: Foundation Skills (Always Invoked)
-1. **blueteam-defend** (287 lines) — Full defensive audit, all OWASP layers, never-trust doctrine
-   Location: `/blueteam-defend/SKILL.md` (reference, top-level)
+Tier 1 — Foundation (always):
+- **blueteam-defend** — full defensive audit, all OWASP layers. `/blueteam-defend/SKILL.md`
+- **redteam-attack** — offensive/design review, SSRF/XXE. `/redteam-attack/SKILL.md`
+- **secret-scanning** — exposed credentials vs public config. `specialized/secret-scanning/`
 
-2. **redteam-attack** (306 lines) — Offensive review, design/spec attacks
-   Location: `/redteam-attack/SKILL.md` (reference, top-level)
+Tier 2 — Core:
+- **access-control-auditing** — IDOR/BOLA/BFLA (backend-is-truth). `specialized/access-control-auditing/`
+- **jwt-cryptography-audit** — JWT security, algorithm confusion. `specialized/jwt-cryptography-audit/`
+- **cryptographic-weaknesses-audit** — hashes/ciphers, password hashing, RNG, IV/nonce, TLS. `specialized/cryptographic-weaknesses-audit/`
+- **frontend-validation-bypass** — client checks (HIGH only if backend fails). `specialized/frontend-validation-bypass/`
+- **mass-assignment-audit** — ORM field binding, privesc. `specialized/mass-assignment-audit/`
 
-3. **secret-scanning** (203 lines) — Exposed credentials, public config vs true secrets
-   Location: `/security-audit-orchestrator/specialized/secret-scanning/SKILL.md`
+Tier 3 — Injection & input:
+- **sql-injection-deep-dive** — concatenation in queries, real payloads. `specialized/sql-injection-deep-dive/`
+- **character-encoding-injection** — emoji/Unicode, byte-length overflow. `specialized/character-encoding-injection/`
+- **cors-csrf-audit** — cross-origin, CSRF tokens, cookie security. `specialized/cors-csrf-audit/`
+- **ai-prompt-injection-audit** — LLM injection, insecure output, excessive agency. `specialized/ai-prompt-injection-audit/`
 
-### Tier 2: Core Security Skills (Usually Needed)
-4. **access-control-auditing** (288 lines) — IDOR/BOLA/BFLA (backend-is-truth doctrine)
-   Location: `/security-audit-orchestrator/specialized/access-control-auditing/SKILL.md`
+Tier 4 — Reliability, rate-limit & abuse:
+- **fail-open-error-handling** — fail-open vs fail-closed. `specialized/fail-open-error-handling/`
+- **rate-limiting-audit** — auth brute-force/DoS throttling. `specialized/rate-limiting-audit/`
+- **api-rate-limiting** — platform quota, cost/billing, gateway & GraphQL cost. `specialized/api-rate-limiting/`
+- **api-abuse-detection** — credential stuffing, enumeration, scraping, bots. `specialized/api-abuse-detection/`
+- **integer-arithmetic-hardening** — overflow/underflow in financial code. `specialized/integer-arithmetic-hardening/`
+- **concurrency-race-condition-audit** — TOCTOU, double-spend, idempotency. `specialized/concurrency-race-condition-audit/`
 
-5. **jwt-cryptography-audit** (308 lines) — JWT security, algorithm confusion
-   Location: `/security-audit-orchestrator/specialized/jwt-cryptography-audit/SKILL.md`
+Tier 5 — Cloud/infra/mobile (by deploy target):
+- **container-kubernetes-security-audit** — Dockerfile/runtime, K8s securityContext/RBAC. `specialized/container-kubernetes-security-audit/`
+- **iam-privilege-escalation-audit** — cloud IAM privesc (AWS/GCP/Azure). `specialized/iam-privilege-escalation-audit/`
+- **mobile-app-security-audit** — iOS/Android storage, cert pinning, exported components (MASVS). `specialized/mobile-app-security-audit/`
 
-6. **cryptographic-weaknesses-audit** (374 lines) — Weak hashes/ciphers, password hashing, RNG, IV/nonce, TLS
-   Location: `/security-audit-orchestrator/specialized/cryptographic-weaknesses-audit/SKILL.md`
+Tier 6 — Resource & supply chain:
+- **memory-resource-leaks** — handles, goroutines, listeners. `specialized/memory-resource-leaks/`
+- **dependency-security-audit** — CVEs, supply chain. `specialized/dependency-security-audit/`
+- **solidity-hardening** — smart contracts (blockchain only). `/solidity-hardening/SKILL.md`
 
-7. **frontend-validation-bypass** (275 lines) — Client-side checks (only HIGH if backend fails)
-   Location: `/security-audit-orchestrator/specialized/frontend-validation-bypass/SKILL.md`
+## Select by type
 
-8. **mass-assignment-audit** (263 lines) — ORM field binding, privilege escalation
-   Location: `/security-audit-orchestrator/specialized/mass-assignment-audit/SKILL.md`
+- **Web app** (Express/Django/Spring): Tiers 1-4 + relevant Tier 6 (always crypto).
+- **REST/GraphQL API or microservice**: Tiers 1-4 full (emphasize api-rate-limiting, api-abuse, concurrency, deps).
+- **AI/LLM** (agents, RAG, tools): add ai-prompt-injection as Tier-1 priority.
+- **Containerized/K8s**: add container-kubernetes. **Cloud/IaC**: add iam-privilege-escalation.
+- **Mobile**: add mobile-app-security (backend still gets Tiers 1-4).
+- **Smart contract**: solidity-hardening + blueteam + redteam + crypto.
+- **CLI**: skip rate-limiting; focus input validation, secrets, deps, crypto.
 
-### Tier 3: Injection & Input Skills (Deep-Dive Attack Vectors)
-9. **sql-injection-deep-dive** (348 lines) — String concatenation in queries, real payloads
-   Location: `/security-audit-orchestrator/specialized/sql-injection-deep-dive/SKILL.md`
+## Run
 
-10. **character-encoding-injection** (289 lines) — Emoji/Unicode attacks, byte-length overflow
-    Location: `/security-audit-orchestrator/specialized/character-encoding-injection/SKILL.md`
+Phases A-D run in parallel; E conditional; F sequential.
 
-11. **cors-csrf-audit** (381 lines) — Cross-origin attacks, CSRF tokens, cookie security
-    Location: `/security-audit-orchestrator/specialized/cors-csrf-audit/SKILL.md`
+- **A** — secret-scanning + integer-arithmetic + cryptographic-weaknesses.
+- **B** — access-control + jwt-crypto + frontend-validation + mass-assignment.
+- **C** — sql-injection + character-encoding + cors-csrf + ai-prompt-injection (if LLM).
+- **D** — fail-open + rate-limiting + api-rate-limiting + api-abuse + concurrency + memory-leaks.
+- **E** (if applicable) — container-k8s + iam-privesc + mobile.
+- **F** (sequential) — dependency-security → blueteam-defend → redteam-attack.
 
-12. **ai-prompt-injection-audit** (328 lines) — LLM prompt injection, jailbreaks, insecure output handling, excessive agency (OWASP LLM Top 10)
-    Location: `/security-audit-orchestrator/specialized/ai-prompt-injection-audit/SKILL.md`
+Each finding: ID, Title, Severity, Location (file:line), Vector, Impact, Evidence, Confidence, Fix.
 
-### Tier 4: Reliability, Rate Limiting & Abuse
-13. **fail-open-error-handling** (302 lines) — Fail-open vs fail-closed distinction
-    Location: `/security-audit-orchestrator/specialized/fail-open-error-handling/SKILL.md`
+## Synthesize → dedup → verify → rank
 
-14. **rate-limiting-audit** (332 lines) — Brute-force, auth endpoint throttling
-    Location: `/security-audit-orchestrator/specialized/rate-limiting-audit/SKILL.md`
+**Dedup:** if 2+ skills flag the same thing → one record, "Confirmed by A+B". Intentional overlaps kept separate: SQL-inj + char-encoding (emoji, diff angles); secret-scan + jwt + crypto (keys, diff angles); access-control + frontend-validation (perms, diff layers); rate-limiting + api-rate-limiting (brute-force vs cost); access-control + iam-privesc (app vs cloud); api-abuse + rate-limiting (scale vs throttle).
 
-15. **api-rate-limiting** (404 lines) — API-platform quotas, cost/billing protection, gateway & GraphQL cost limits
-    Location: `/security-audit-orchestrator/specialized/api-rate-limiting/SKILL.md`
+**Adversarially verify (downgrade rules — these catch real over-claims):**
+- JWT "alg-confusion/none → total bypass" + *string* (symmetric) secret on jsonwebtoken v9: `none` rejected by default, no RS pubkey to confuse → LOW hardening, not CRITICAL.
+- "Secret inlined in client bundle" — only if a client component refs it; grep the build. Latent ≠ confirmed.
+- Fail-open env gate (e.g. fixed OTP when `STAGE!=='prod'`) — severity hinges on prod setting the var; state it.
+- Debug logging gated on release/debug mode → hygiene, not live leak.
+- Read the actual handler before publishing any CRITICAL IDOR/auth claim. List SAFE counterexamples to prove a finding is *mixed*, not blanket.
 
-16. **api-abuse-detection** (357 lines) — Credential stuffing, enumeration, scraping, business-logic abuse, bots
-    Location: `/security-audit-orchestrator/specialized/api-abuse-detection/SKILL.md`
+**Rank:** Tier A then Tier B (doctrine 1); within tier, severity + fix effort. Launch blockers = CRITICAL + low effort.
 
-17. **integer-arithmetic-hardening** (268 lines) — Overflow/underflow in financial code
-    Location: `/security-audit-orchestrator/specialized/integer-arithmetic-hardening/SKILL.md`
+## Output: COMPREHENSIVE_SECURITY_AUDIT.md
 
-18. **concurrency-race-condition-audit** (364 lines) — TOCTOU, double-spend, lost updates, idempotency, data races
-    Location: `/security-audit-orchestrator/specialized/concurrency-race-condition-audit/SKILL.md`
+Reconciliation table (if a prior audit exists: prior ID → verdict → new ref) · executive summary · Tier A findings · Tier B findings · passing controls (+ SAFE counterexamples) · remediation by sprint (P0 = live theft + brute-force, then secrets) · verification commands · self-assessment (what verify caught, what's still unknown: secret strength, prod env values, package provenance).
 
-### Tier 5: Cloud, Infrastructure & Mobile (Conditional — by deployment target)
-19. **container-kubernetes-security-audit** (409 lines) — Dockerfile/runtime hardening, K8s securityContext/RBAC/NetworkPolicy
-    Location: `/security-audit-orchestrator/specialized/container-kubernetes-security-audit/SKILL.md`
+## Recurring bug — broken object-level authorization
 
-20. **iam-privilege-escalation-audit** (341 lines) — Cloud IAM privesc paths (AWS/GCP/Azure), wildcard & PassRole abuse
-    Location: `/security-audit-orchestrator/specialized/iam-privilege-escalation-audit/SKILL.md`
-
-21. **mobile-app-security-audit** (385 lines) — iOS/Android insecure storage, cert pinning, exported components, deep links (MASVS)
-    Location: `/security-audit-orchestrator/specialized/mobile-app-security-audit/SKILL.md`
-
-### Tier 6: Resource Management & Supply Chain (Conditional)
-22. **memory-resource-leaks** (263 lines) — File handles, goroutines, listeners
-    Location: `/security-audit-orchestrator/specialized/memory-resource-leaks/SKILL.md`
-
-23. **dependency-security-audit** (269 lines) — CVEs, supply chain attacks
-    Location: `/security-audit-orchestrator/specialized/dependency-security-audit/SKILL.md`
-
-24. **solidity-hardening** (282 lines) — Smart contract hardening (only for blockchain)
-    Location: `/solidity-hardening/SKILL.md` (reference, top-level)
-
-## Best Practice Format — All Skills Now in Full Phase 1-7
-
-Each skill includes:
-
+Routes check identity + billing, never ownership:
 ```
-Frontmatter (name, description, triggers)
-↓
-Title & Default Workflow
-↓
-Core Doctrine (table of assumptions & fixes)
-↓
-Operating Principles (5-8 bullet points)
-↓
-Phase 1: Detection strategy (what to look for)
-↓
-Phase 2: Grep leads (actual search patterns per language)
-↓
-Phase 3: Triage (severity/confidence/effort ratings)
-↓
-Phase 4: Ponytail fix ladder (5-6 rungs, stop at first that holds)
-↓
-Phase 5: Record format (ID, Title, Severity, Location, Vector, Impact, Fix)
-↓
-Phase 6: Propose → Fix on Approval workflow (vulnerable → fixed code)
-↓
-Phase 7: Verification checklist (10+ items)
-↓
-Quality Bar (8-10 acceptance criteria)
-↓
-Example Triggers (5-8 user phrases)
-↓
-Relationship to blueteam-defend
+1. logged in?            → authenticate    ✅ present
+2. tenant's plan allows? → requireFeature  ✅ present — BILLING, not authz
+3. do YOU own THIS one?  → ownership check  ❌ MISSING ← the bug
 ```
+Vulnerable: `findByIdAndUpdate(req.params.id, data)` — no `req.user` check between lookup and write. Fix: assert caller membership+role for that id (copy the project's newer handlers), add a role gate on the route. Trap: don't trust `req.user.tenantId` if auth derived it from the same client URL param — validate against the real membership list.
 
-**Status:** All 24 skills are complete and follow the full Phase 1-7 format above. Per-skill line counts and one-line scopes live in the Skill Ecosystem listing; severity doctrine lives in Severity Mapping. (No per-skill status table here — it would just restate the ecosystem listing.)
+## Severity mapping (OWASP 2025)
 
-## Orchestration Workflow
-
-1. **SCOPE** — Detect language, framework, codebase type
-   - Questions: Language? (JS, Python, Go, Java, C#, PHP, Rust?)
-   - Framework? (Express, Django, Gin, Spring, .NET, Laravel, Rocket?)
-   - Type? (Web app, API, microservice, smart contract, CLI?)
-   - Infrastructure? (Docker, Kubernetes, serverless, monolith?)
-
-2. **SELECT** — Choose applicable skills (10-24 depending on type)
-   - Web app (Express/Django/Spring): Tiers 1-4 + relevant Tier 6 (always include cryptographic-weaknesses)
-   - REST/GraphQL API or microservice: Tiers 1-4 in full (emphasize api-rate-limiting, api-abuse-detection, concurrency-race-condition, dependencies)
-   - AI / LLM app (agents, RAG, tool-calling): add ai-prompt-injection-audit as a Tier-1 priority
-   - Containerized / Kubernetes deployment: add container-kubernetes-security-audit (Tier 5)
-   - Cloud infra / IaC (Terraform, IAM policies): add iam-privilege-escalation-audit (Tier 5)
-   - Mobile app (iOS/Android): add mobile-app-security-audit (Tier 5); backend still gets Tiers 1-4
-   - Smart contract (Solidity): solidity-hardening + blueteam-defend + redteam-attack + cryptographic-weaknesses
-   - CLI: Skip rate-limiting-audit / api-rate-limiting; focus on input validation, secrets, dependencies, crypto
-
-3. **PHASE A** — Run in parallel: secret-scanning + integer-arithmetic-hardening + cryptographic-weaknesses-audit
-   - secret-scanning: Hardcoded credentials
-   - integer-arithmetic-hardening: Financial/numeric boundaries
-   - cryptographic-weaknesses-audit: Weak hashes/ciphers, password hashing, RNG, IV/nonce, TLS
-
-4. **PHASE B** — Run in parallel: access-control-auditing + jwt-cryptography-audit + frontend-validation-bypass + mass-assignment-audit
-   - access-control-auditing: IDOR/BOLA/BFLA checks
-   - jwt-cryptography-audit: Token vulnerabilities
-   - frontend-validation-bypass: Backend-is-truth verification
-   - mass-assignment-audit: ORM field binding
-
-5. **PHASE C** — Run in parallel: sql-injection-deep-dive + character-encoding-injection + cors-csrf-audit + ai-prompt-injection-audit (if AI/LLM present)
-   - sql-injection-deep-dive: String concatenation patterns
-   - character-encoding-injection: Emoji/Unicode attacks
-   - cors-csrf-audit: Cross-origin & CSRF tokens
-   - ai-prompt-injection-audit: LLM injection, insecure output handling, excessive agency
-
-6. **PHASE D** — Run in parallel: fail-open-error-handling + rate-limiting-audit + api-rate-limiting + api-abuse-detection + concurrency-race-condition-audit + memory-resource-leaks
-   - fail-open-error-handling: Exception handling security
-   - rate-limiting-audit: Auth brute-force/DoS prevention
-   - api-rate-limiting: Platform quota, cost protection, gateway & GraphQL cost limits
-   - api-abuse-detection: Credential stuffing, enumeration, scraping, business-logic abuse
-   - concurrency-race-condition-audit: TOCTOU, double-spend, lost updates, idempotency
-   - memory-resource-leaks: Resource cleanup
-
-7. **PHASE E** — Run in parallel (only if applicable to deployment target): container-kubernetes-security-audit + iam-privilege-escalation-audit + mobile-app-security-audit
-   - container-kubernetes-security-audit: Docker/K8s hardening (containerized deploys)
-   - iam-privilege-escalation-audit: Cloud IAM privesc paths (cloud/IaC)
-   - mobile-app-security-audit: iOS/Android client hardening (mobile apps)
-
-8. **PHASE F** — Run sequentially: dependency-security-audit → blueteam-defend → redteam-attack
-   - dependency-security-audit: Supply chain CVEs
-   - blueteam-defend: Comprehensive defensive audit
-   - redteam-attack: Offensive security review
-
-9. **SYNTHESIZE** — Merge findings across all skills
-   - Collect: ID, Title, Severity, Location, Vector, Impact, Evidence, Confidence, Fix
-
-10. **DEDUPLICATION** — Remove duplicate findings across skills
-    - Rule 1: If 2+ skills flag same finding → Keep 1 record, note "Confirmed by skill-A + skill-B"
-    - Rule 2: Intentional overlaps (not duplicates):
-      - **SQL-injection + character-encoding:** Both handle emoji attacks (different angles)
-      - **Secret-scanning + JWT-crypto + cryptographic-weaknesses:** Both touch keys/secrets & crypto (different angles)
-      - **Access-control + frontend-validation:** Both touch permission checks (different angles)
-      - **rate-limiting-audit + api-rate-limiting:** Auth brute-force vs platform quota/cost (different scope)
-      - **access-control + iam-privilege-escalation:** App-layer authz vs cloud-IAM privesc (different layers)
-      - **api-abuse-detection + rate-limiting:** Abuse-at-scale vs raw throttling (complementary)
-
-11. **PRIORITIZE** — Group by severity + fix effort + OWASP layer
-    - Launch Blockers: CRITICAL + Low fix effort (fix immediately)
-    - Sprint 1: HIGH + Low-Medium effort, or MEDIUM + Quick wins
-    - Sprint 2+: MEDIUM + Complex fixes, LOW + Future improvements
-
-12. **PROPOSE** — Batch remediation by sprint
-    - Show findings grouped by layer
-    - Example fixes (vulnerable → fixed code)
-    - Estimated effort per fix
-
-13. **APPLY** — User approves, fixes applied with Ponytail strategy
-    - Each skill provides Phase 4 (Ponytail ladder) showing layered fixes
-    - Start at lowest rung that holds (framework first, then custom)
-
-14. **VERIFY** — Re-run skills, confirm vulnerabilities closed
-    - Re-grep for patterns
-    - Test by-hand (manually trigger exception, change URL param, etc.)
-    - Confirm: Issue closed, no regressions
-
-15. **OUTPUT** — Comprehensive COMPREHENSIVE_SECURITY_AUDIT.md
-    - Executive summary (high-level findings by layer)
-    - Detailed findings (by skill + severity)
-    - Remediation plan (by sprint)
-    - Verification results
-
-## Key Learnings Applied to All Skills
-
-1. **Public config ≠ secret** (Firebase keys, Google keys safe in .env)
-   - Used in: secret-scanning
-   - Only flag as CRITICAL if issuer doesn't provide abuse monitoring
-
-2. **Backend is truth** (if backend validates, frontend UI = LOW cosmetic)
-   - Used in: frontend-validation-bypass, access-control-auditing
-   - Only flag as HIGH if backend fails to validate
-
-3. **Fail-closed ≠ fail-open** (only flag if error grants access)
-   - Used in: fail-open-error-handling
-   - Only flag if exception path allows operation
-
-4. **Verify compensating controls** (downstream auth may mitigate)
-   - Applied across: All skills check for mitigation
-   - Example: IDOR in frontend but backend validates = LOW
-
-5. **Ponytail ladder in every skill**
-   - Ladder emphasizes framework first (not custom)
-   - Example: Rate-limiting: framework middleware → managed service → custom
-   - Example: SQL-injection: parameterized queries → ORM → never escaping
-
-## Language-Specific Patterns
-
-All skills include grep patterns for:
-- **JavaScript/Node.js** (Express, Next.js, vanilla)
-- **Python** (Django, Flask, FastAPI)
-- **Go** (Gin, Echo, std http)
-- **Java** (Spring Boot, Spring Security)
-- **C#/.NET** (ASP.NET Core, Entity Framework)
-- **PHP** (Laravel, Symfony)
-- **Rust** (Actix, Rocket, Axum)
-- **Ruby** (Rails)
-- **Solidity** (Ethereum smart contracts)
-
-## Severity Mapping (OWASP 2025)
-
-| OWASP Layer | Skills | Example Severities |
+| Layer | Skills | Example |
 |---|---|---|
-| Layer 1: Broken Access Control | access-control, frontend-validation, iam-privilege-escalation, mobile-app-security | CRITICAL (IDOR), CRITICAL (IAM privesc to admin), HIGH (BFLA) |
-| Layer 2: Cryptographic Failures | cryptographic-weaknesses, jwt-crypto, character-encoding, secret-scanning | CRITICAL (exposed secret / weak password hash), HIGH (weak crypto) |
-| Layer 3: Injection | sql-injection, character-encoding, ai-prompt-injection | CRITICAL (SQL injection), HIGH (prompt injection → privileged action) |
-| Layer 4: Insecure Design | rate-limiting, api-rate-limiting, api-abuse-detection, concurrency-race-condition, fail-open | CRITICAL (double-spend / fail-open), HIGH (no rate limit, abuse, cost runaway) |
-| Layer 5: Misconfiguration | cors-csrf, container-kubernetes-security | CRITICAL (privileged container / cluster-admin), HIGH (CORS: *) |
-| Layer 6: Vulnerable Components | dependency-security | CRITICAL (unpatched CVE) |
-| Layer 7: Authentication Failures | jwt-crypto, fail-open | CRITICAL (invalid token accepted) |
-| Layer 8: Software & Data Integrity | dependency-security | CRITICAL (malicious package) |
-| Layer 9: Logging & Monitoring | fail-open, api-abuse-detection | HIGH (exception not logged, no abuse monitoring) |
-| Layer 10: SSRF, XXE, etc. | redteam-attack | HIGH (SSRF possible) |
-| OWASP LLM Top 10 | ai-prompt-injection | CRITICAL (injection → tool/RCE), HIGH (system-prompt leak) |
-| OWASP MASVS (Mobile) | mobile-app-security | CRITICAL (extractable secrets), HIGH (no cert pinning) |
+| A01 Broken Access Control | access-control, frontend-validation, iam-privesc, mobile | CRITICAL IDOR / IAM privesc, HIGH BFLA |
+| A02 Cryptographic Failures | crypto-weaknesses, jwt, char-encoding, secret-scan | CRITICAL exposed secret / weak password hash |
+| A03 Injection | sql-injection, char-encoding, ai-prompt-injection | CRITICAL SQLi, HIGH prompt-inj → privileged action |
+| A04 Insecure Design | rate-limiting, api-rate-limiting, api-abuse, concurrency, fail-open | CRITICAL double-spend/fail-open, HIGH no rate limit |
+| A05 Misconfiguration | cors-csrf, container-k8s | CRITICAL privileged container, HIGH CORS `*` |
+| A06 Vulnerable Components | dependency-security | CRITICAL unpatched CVE |
+| A07 Auth Failures | jwt, fail-open | CRITICAL invalid token accepted |
+| A08 Integrity | dependency-security | CRITICAL malicious package |
+| A09 Logging/Monitoring | fail-open, api-abuse | HIGH unlogged exception / no abuse monitoring |
+| A10 SSRF/XXE | redteam-attack | HIGH SSRF |
+| LLM Top 10 | ai-prompt-injection | CRITICAL injection → tool/RCE |
+| MASVS (Mobile) | mobile-app-security | CRITICAL extractable secret, HIGH no cert pinning |
 
-## Example Triggers
-
-- "security audit"
-- "full security review"
-- "complete security assessment"
-- "audit everything"
-- "OWASP compliance"
-- "vulnerability scan"
-- "security assessment"
-- "penetration test"
-
-## Relationship to blueteam-defend
-
-**Orchestrator COORDINATES blueteam-defend + 23 specialist skills.**
-
-blueteam-defend is comprehensive (287 lines, all OWASP layers); orchestrator adds:
-- Skill selection logic (scope-aware)
-- Phased execution order (PHASE A–F: 5 parallel phases + 1 sequential)
-- Deduplication across skills (merge duplicate findings)
-- Batched remediation proposals (Launch Blockers → Sprint 1 → Sprint 2+)
-- Unified COMPREHENSIVE_SECURITY_AUDIT.md output with executive summary + detailed findings + remediation plan
-
-**When to use orchestrator vs blueteam-defend:**
-- Want comprehensive one-shot audit? → Use orchestrator (delegates to blueteam-defend + others)
-- Want defensive security principles + all OWASP layers? → Use blueteam-defend directly
-- Want offensive review? → Use redteam-attack
-- Want specific vulnerability audit? → Use individual skill (sql-injection-deep-dive, etc.)
-
-## Quality Checklist
-
-1. ✅ All 21 specialized skills implement the full Best Practice Format above (Core Doctrine → Phases 1-7 → Quality Bar → Triggers)
-2. ✅ Deduplication logic defined (6 intentional overlaps — see step 10)
-3. ✅ Key learnings embedded (public config, backend-is-truth, fail-closed, compensating controls, Ponytail)
-4. ✅ IceBreaker lessons applied (no over-flagging, distinction between HIGH vs LOW)
-5. ✅ Organized hierarchically (orchestrator as main, specialized skills in subfolder)
-6. ✅ Ready for production use on any codebase type
-
-## Next Steps
-
-1. Test orchestrator on 2-3 real codebases
-2. Verify deduplication merges findings correctly
-3. Validate Ponytail fixes work as described
-4. Confirm no over-flagging (IceBreaker lessons hold)
-5. Gather feedback and iterate
+## Triggers
+"security audit", "full security review", "OWASP compliance", "vulnerability scan", "penetration test", "what's actually exploitable".
