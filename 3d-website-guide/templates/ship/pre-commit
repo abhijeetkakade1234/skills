@@ -1,0 +1,10 @@
+# Lint only the staged source files so commits stay fast; CI runs the full suite.
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|mjs)$' || true)
+
+if [ -n "$STAGED" ]; then
+  echo "Running ESLint on staged files..."
+  npx eslint $STAGED || {
+    echo "ESLint failed. Fix the errors above before committing."
+    exit 1
+  }
+fi
